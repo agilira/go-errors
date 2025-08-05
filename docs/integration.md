@@ -161,4 +161,4 @@ A: No, it is lightweight and only captured when wrapping errors.
 
 ---
 
-Metis • an AGILira fragment
+go-errors • an AGILira library

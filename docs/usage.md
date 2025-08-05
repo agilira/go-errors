@@ -89,4 +89,4 @@ if err != nil {
 
 ---
 
-Metis • an AGILira library
+go-errors • an AGILira library

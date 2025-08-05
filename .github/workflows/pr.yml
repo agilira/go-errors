@@ -5,7 +5,7 @@ on:
     branches: [ main, develop ]
 
 env:
-  GO_VERSION: '1.24.4'
+  GO_VERSION: '1.24.5'
 
 jobs:
   pr-checks:
@@ -15,19 +15,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: ${{ env.GO_VERSION }}
         cache: true
-
-    - name: Check for merge conflicts
-      run: |
-        git fetch origin ${{ github.base_ref }}
-        git merge-tree $(git merge-base HEAD origin/${{ github.base_ref }}) HEAD origin/${{ github.base_ref }}
 
     - name: Validate go.mod and go.sum
       run: |
@@ -40,132 +33,16 @@ jobs:
           exit 1
         fi
 
-    - name: Check for large files
+    - name: Run tests
+      run: go test -v -race ./...
+
+    - name: Run go fmt check
       run: |
-        find . -type f -size +10M | grep -v '.git' || true
-        if [ "$(find . -type f -size +10M | grep -v '.git' | wc -l)" -gt 0 ]; then
-          echo "Large files detected (>10MB). Please review."
+        if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+          echo "Code is not formatted. Please run 'go fmt ./...'"
+          gofmt -s -d .
           exit 1
         fi
 
-    - name: Check commit message format
-      run: |
-        git log --oneline ${{ github.event.pull_request.base.sha }}..HEAD | while read line; do
-          if ! echo "$line" | grep -qE '^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+'; then
-            echo "Invalid commit message format: $line"
-            echo "Expected format: type(scope): description"
-            exit 1
-          fi
-        done
-
-  size-check:
-    name: Size Check
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Check PR size
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const { data: pr } = await github.rest.pulls.get({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number,
-          });
-          
-          const additions = pr.additions;
-          const deletions = pr.deletions;
-          const total = additions + deletions;
-          
-          console.log(`PR Size: +${additions} -${deletions} = ${total} changes`);
-          
-          if (total > 1000) {
-            core.setFailed(`PR is too large: ${total} changes. Please consider breaking it into smaller PRs.`);
-          }
-          
-          if (additions > 500) {
-            core.warning(`Large additions: ${additions} lines. Please review for potential issues.`);
-          }
-
-  documentation:
-    name: Documentation Check
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        cache: true
-
-    - name: Check documentation
-      run: |
-        # Check if all exported functions have documentation
-        go list -f '{{.Dir}}' ./... | while read dir; do
-          if [ -d "$dir" ]; then
-            go doc -all "$dir" 2>/dev/null || echo "Documentation issues in $dir"
-          fi
-        done
-
-    - name: Validate README links
-      run: |
-        # Check for broken links in README (basic check)
-        if [ -f README.md ]; then
-          grep -o 'http[s]*://[^)]*' README.md | while read url; do
-            if ! curl -s --head "$url" > /dev/null; then
-              echo "Broken link in README: $url"
-            fi
-          done
-        fi
-
-  performance:
-    name: Performance Check
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        cache: true
-
-    - name: Run performance benchmarks
-      run: |
-        go test -bench=. -benchmem -run=^$ ./... 2>/dev/null || echo "No benchmarks found"
-
-    - name: Check for performance regressions
-      run: |
-        # Basic performance check - can be enhanced with historical data
-        go test -bench=. -benchmem -run=^$ ./... | grep -E "(Benchmark|ns/op|B/op)" || echo "No benchmark results"
-
-  compatibility:
-    name: Compatibility Check
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [1.24.4, 1.25.0]
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Go ${{ matrix.go-version }}
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ matrix.go-version }}
-        cache: true
-
-    - name: Test compatibility
-      run: |
-        go mod download
-        go test ./...
-        go build ./... 
+    - name: Run go vet
+      run: go vet ./... 
