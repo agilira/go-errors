@@ -4,8 +4,6 @@
 Reusable, modular error handling library for Go.
 
 [![CI](https://github.com/agilira/go-errors/actions/workflows/ci.yml/badge.svg)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/agilira/go-errors)](https://go.dev/)
-[![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://www.mozilla.org/en-US/MPL/2.0/)
 [![Security](https://img.shields.io/badge/Security-gosec-brightgreen)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
 
