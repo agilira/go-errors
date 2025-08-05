@@ -55,6 +55,8 @@ jobs:
       run: go mod download
 
     - name: Run tests with coverage
+      env:
+        CGO_ENABLED: 1
       run: |
         go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
         go tool cover -func=coverage.out
@@ -110,6 +112,8 @@ jobs:
       run: gosec ./...
 
     - name: Check for race conditions
+      env:
+        CGO_ENABLED: 1
       run: go test -race ./...
 
   security:
