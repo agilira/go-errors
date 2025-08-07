@@ -1,7 +1,7 @@
 // json.go: Iplementing custom JSON marshaling go-errors AGILira library
 //
 // Copyright (c) 2025 AGILira
-// Series: an AGLIra fragment
+// Series: an AGLIra library
 // SPDX-License-Identifier: MPL-2.0
 
 package errors

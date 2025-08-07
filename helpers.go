@@ -1,7 +1,7 @@
 // helpers.go: Helpers functions for the go-errors AGILira library
 //
 // Copyright (c) 2025 AGILira
-// Series: an AGLIra fragment
+// Series: an AGLIra library
 // SPDX-License-Identifier: MPL-2.0
 
 package errors
