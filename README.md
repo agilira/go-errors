@@ -1,14 +1,12 @@
-# go-errors
+# go-errors: Structured, contextual error handling for Go
 ### an AGILira library
 
-Reusable, modular error handling library for Go.
+go-errors is a fast, structured, and context-aware error handling library for Go.
+Built for Styx, it includes error codes, stack traces, user messages, and JSON support — with zero overhead.
 
 [![CI](https://github.com/agilira/go-errors/actions/workflows/ci.yml/badge.svg)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
 [![Security](https://img.shields.io/badge/Security-gosec-brightgreen)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
-
-## Overview
-**go-errors** provides robust, structured, and extensible error management for modern Go projects. It supports error codes, context, stacktraces, user messages, JSON serialization, and more—without sacrificing simplicity or performance.
 
 ## Features
 - Structured error type: code, message, context, cause, severity
