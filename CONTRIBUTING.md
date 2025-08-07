@@ -27,11 +27,11 @@ If you have an idea for a new feature or an improvement to an existing one, plea
 
 ## Development Process
 
-1.  **Fork the Repository**: Start by forking the main Metis repository to your own GitHub account.
+1.  **Fork the Repository**: Start by forking the main go-errors repository to your own GitHub account.
 2.  **Clone Your Fork**: Clone your forked repository to your local machine.
     ```bash
-    git clone https://github.com/YOUR_USERNAME/metis.git
-    cd metis
+    git clone https://github.com/YOUR_USERNAME/go-errors.git
+    cd go-errors
     ```
 3.  **Create a Branch**: Create a new branch for your changes. Use a descriptive name (e.g., `fix/....` or `feature/....`).
     ```bash
@@ -54,7 +54,7 @@ If you have an idea for a new feature or an improvement to an existing one, plea
     ```bash
     git push origin your-branch-name
     ```
-9.  **Open a Pull Request**: Open a pull request from your branch to the `main` branch of the official Metis repository. Provide a clear title and description for your PR, referencing any related issues.
+9.  **Open a Pull Request**: Open a pull request from your branch to the `main` branch of the official go-errors repository. Provide a clear title and description for your PR, referencing any related issues.
 
 ## Pull Request Guidelines
 
