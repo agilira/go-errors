@@ -12,6 +12,27 @@ func (e *Error) WithUserMessage(msg string) *Error {
 	return e
 }
 
+// WithContext adds or updates context information on the error.
+func (e *Error) WithContext(key string, value interface{}) *Error {
+	if e.Context == nil {
+		e.Context = make(map[string]interface{})
+	}
+	e.Context[key] = value
+	return e
+}
+
+// AsRetryable marks the error as retryable.
+func (e *Error) AsRetryable() *Error {
+	e.Retryable = true
+	return e
+}
+
+// WithSeverity sets the severity level of the error.
+func (e *Error) WithSeverity(severity string) *Error {
+	e.Severity = severity
+	return e
+}
+
 // UserMessage returns the user-friendly message if set, otherwise the technical message.
 func (e *Error) UserMessage() string {
 	if e.UserMsg != "" {
