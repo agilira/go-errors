@@ -1,4 +1,4 @@
-// json.go: Iplementing custom JSON marshaling go-errors AGILira library
+// json.go: Implementing custom JSON marshaling go-errors AGILira library
 //
 // Copyright (c) 2025 AGILira
 // Series: an AGLIra library
@@ -11,6 +11,7 @@ import (
 )
 
 // MarshalJSON implements custom JSON marshaling for Error.
+// It converts the stack trace to a string representation for JSON serialization.
 func (e *Error) MarshalJSON() ([]byte, error) {
 	type Alias Error
 	return json.Marshal(&struct {

@@ -7,7 +7,7 @@ Built for Styx, it includes error codes, stack traces, user messages, and JSON s
 [![CI](https://github.com/agilira/go-errors/actions/workflows/ci.yml/badge.svg)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
 [![Security](https://img.shields.io/badge/Security-gosec-brightgreen)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/agilira/go-errors)](https://goreportcard.com/report/github.com/agilira/go-errors)
-[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-86%25-brightgreen)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
 
 ## Features
 - Structured error type: code, message, context, cause, severity
@@ -37,6 +37,18 @@ func validateUser(username string) error {
     }
     return nil
 }
+```
+
+## JSON Output
+Errors automatically serialize to structured JSON:
+```go
+err := errors.New("VALIDATION_ERROR", "Email format invalid").
+    WithUserMessage("Please enter a valid email address").
+    WithContext("field", "email").
+    WithSeverity("warning")
+
+jsonData, _ := json.Marshal(err)
+// Output: {"code":"VALIDATION_ERROR","message":"Email format invalid","user_msg":"Please enter a valid email address","context":{"field":"email"},"severity":"warning","timestamp":"2025-01-27T10:30:00Z",...}
 ```
 
 ## Testing & Coverage

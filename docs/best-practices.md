@@ -96,6 +96,17 @@ err := errors.New(ErrCodeValidation, "Email format invalid").
     WithUserMessage("Please enter a valid email address")
 ```
 
+### Use Method Chaining
+Leverage method chaining for clean, readable error creation:
+
+```go
+err := errors.New(ErrCodeValidation, "Invalid input").
+    WithUserMessage("Please check your input and try again").
+    WithContext("field", "email").
+    WithSeverity("warning").
+    AsRetryable()
+```
+
 ## Error Wrapping Strategy
 
 ### Wrap at Service Boundaries
@@ -187,8 +198,22 @@ func (c *Client) makeRequest(req *Request) (*Response, error) {
         
         return nil, err
     }
-    return nil, errors.New(ErrCodeTimeout, "Max retries exceeded")
+    return nil, errors.New(ErrCodeTimeout, "Max retries exceeded").AsRetryable()
 }
+```
+
+### Use Severity Levels Appropriately
+Apply appropriate severity levels based on error impact:
+
+```go
+// Critical errors that require immediate attention
+err := errors.New(ErrCodeDatabase, "Database connection lost").WithSeverity("critical")
+
+// Warnings for non-critical issues
+err := errors.New(ErrCodeValidation, "Optional field missing").WithSeverity("warning")
+
+// Info for informational messages
+err := errors.New(ErrCodeInfo, "Operation completed with warnings").WithSeverity("info")
 ```
 
 ### Log Errors Appropriately
@@ -339,9 +364,15 @@ For frequently occurring errors, consider creating reusable error instances:
 ```go
 var (
     ErrUserNotFound = errors.New(ErrCodeNotFound, "User not found").
-        WithUserMessage("User not found")
+        WithUserMessage("User not found").
+        WithSeverity("error")
     ErrInvalidEmail = errors.New(ErrCodeValidation, "Invalid email format").
-        WithUserMessage("Please enter a valid email address")
+        WithUserMessage("Please enter a valid email address").
+        WithSeverity("warning")
+    ErrNetworkTimeout = errors.New(ErrCodeNetwork, "Network timeout").
+        WithUserMessage("Please try again later").
+        WithSeverity("warning").
+        AsRetryable()
 )
 ```
 

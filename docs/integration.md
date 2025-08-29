@@ -9,13 +9,13 @@ go-errors provides interfaces for advanced error handling:
 
 ### Example
 ```go
-var coder goerrors.ErrorCoder = err
+var coder errors.ErrorCoder = err
 code := coder.ErrorCode()
 
-var retry goerrors.Retryable = err
+var retry errors.Retryable = err
 if retry.IsRetryable() { /* ... */ }
 
-var um goerrors.UserMessager = err
+var um errors.UserMessager = err
 msg := um.UserMessage()
 ```
 
@@ -43,7 +43,7 @@ go test -cover ./...
 func handler(w http.ResponseWriter, r *http.Request) {
     err := doSomething()
     if err != nil {
-        apiErr, _ := err.(*goerrors.Error)
+        apiErr, _ := err.(*errors.Error)
         http.Error(w, apiErr.UserMessage(), 400)
         // Optionally log apiErr.Stack.String() for debugging
     }
@@ -56,7 +56,7 @@ This guide helps you migrate your Go project from standard error handling to go-
 
 ### 1. Install go-errors
 ```sh
-go get github.com/AGILira/go-errors
+go get github.com/agilira/go-errors
 ```
 
 ### 2. Update Imports
@@ -66,7 +66,7 @@ import "errors"
 ```
 with:
 ```go
-import goerrors "github.com/AGILira/go-errors"
+import "github.com/agilira/go-errors"
 ```
 
 ### 3. Define Error Codes
@@ -82,7 +82,7 @@ return errors.New("validation failed")
 ```
 **After:**
 ```go
-return goerrors.New(ErrCodeValidation, "Validation failed")
+return errors.New(ErrCodeValidation, "Validation failed")
 ```
 
 ### 5. Wrapping Errors
@@ -92,25 +92,28 @@ return fmt.Errorf("db error: %w", err)
 ```
 **After:**
 ```go
-return goerrors.Wrap(err, "DB_ERROR", "db error")
+return errors.Wrap(err, "DB_ERROR", "db error")
 ```
 
-### 6. Add User Messages (Optional)
+### 6. Add User Messages and Context
 ```go
-err := goerrors.New(ErrCodeValidation, "Validation failed").WithUserMessage("Please check your input.")
+err := errors.New(ErrCodeValidation, "Validation failed").
+    WithUserMessage("Please check your input").
+    WithContext("field", "email").
+    WithSeverity("warning")
 ```
 
 ### 7. Use Helpers for Inspection
 Replace manual error checks with helpers:
 ```go
-if goerrors.HasCode(err, ErrCodeValidation) { /* ... */ }
-root := goerrors.RootCause(err)
+if errors.HasCode(err, ErrCodeValidation) { /* ... */ }
+root := errors.RootCause(err)
 ```
 
 ### 8. Update API/Handler Logic
 Return user-friendly messages in APIs:
 ```go
-apiErr, _ := err.(*goerrors.Error)
+apiErr, _ := err.(*errors.Error)
 http.Error(w, apiErr.UserMessage(), 400)
 ```
 
@@ -131,9 +134,9 @@ if err != nil {
 ```go
 if err != nil {
     if errors.Is(err, sql.ErrNoRows) {
-        return goerrors.New("NOT_FOUND", "not found").WithUserMessage("Resource not found")
+        return errors.New("NOT_FOUND", "not found").WithUserMessage("Resource not found")
     }
-    return goerrors.Wrap(err, "DB_ERROR", "db error")
+    return errors.Wrap(err, "DB_ERROR", "db error")
 }
 ```
 

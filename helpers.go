@@ -12,7 +12,8 @@ import (
 	"time"
 )
 
-// Wrap wraps an existing error with code and message, capturing stacktrace.
+// Wrap wraps an existing error with a new code and message, capturing the current stack trace.
+// This is useful for adding context to errors that occur deeper in the call stack.
 func Wrap(err error, code ErrorCode, message string) *Error {
 	return &Error{
 		Code:      code,
@@ -26,16 +27,18 @@ func Wrap(err error, code ErrorCode, message string) *Error {
 }
 
 // Error implements the error interface for *Error.
+// It returns a formatted string containing the error code and message.
 func (e *Error) Error() string {
 	return fmt.Sprintf("[%s]: %s", e.Code, e.Message)
 }
 
-// Unwrap returns the underlying cause.
+// Unwrap returns the underlying cause error, implementing the error wrapping interface.
 func (e *Error) Unwrap() error {
 	return e.Cause
 }
 
-// RootCause returns the original error in the chain.
+// RootCause returns the original error in the error chain by unwrapping all nested errors.
+// This is useful for finding the root cause of an error that has been wrapped multiple times.
 func RootCause(err error) error {
 	for {
 		unwrapped := errors.Unwrap(err)
@@ -46,7 +49,8 @@ func RootCause(err error) error {
 	}
 }
 
-// HasCode checks if any error in the chain has the given code.
+// HasCode checks if any error in the error chain has the given error code.
+// This is useful for checking if a specific type of error occurred anywhere in the chain.
 func HasCode(err error, code ErrorCode) bool {
 	for err != nil {
 		if ec, ok := err.(*Error); ok && ec.Code == code {
@@ -57,7 +61,8 @@ func HasCode(err error, code ErrorCode) bool {
 	return false
 }
 
-// Is implements errors.Is compatibility.
+// Is implements errors.Is compatibility for error comparison.
+// It returns true if the target error has the same error code.
 func (e *Error) Is(target error) bool {
 	if target == nil {
 		return false
@@ -68,7 +73,8 @@ func (e *Error) Is(target error) bool {
 	return false
 }
 
-// As implements errors.As compatibility. It delegates the check to the underlying Cause.
+// As implements errors.As compatibility for error type assertion.
+// It delegates the check to the underlying Cause error.
 // Note: It will not match the *Error instance itself, only errors in its cause chain.
 func (e *Error) As(target interface{}) bool {
 	return errors.As(e.Cause, target)

@@ -1,4 +1,4 @@
-// errors.go: Package errors provides reusable, structured error handling for Go applications.
+// errors.go: Core error types and constructors for the go-errors AGILira library
 //
 // Copyright (c) 2025 AGILira
 // Series: an AGLIra library
@@ -10,10 +10,12 @@ import (
 	"time"
 )
 
-// ErrorCode represents a custom error code (user-defined)
+// ErrorCode represents a custom error code that can be used to categorize and identify specific types of errors.
+// Error codes should be defined as constants in your application for consistency.
 type ErrorCode string
 
-// Error represents a structured error with context and cause
+// Error represents a structured error with comprehensive context and metadata.
+// It includes error codes, messages, stack traces, user-friendly messages, and retry information.
 type Error struct {
 	Code      ErrorCode              `json:"code"`
 	Message   string                 `json:"message"`
@@ -28,7 +30,8 @@ type Error struct {
 	Retryable bool                   `json:"retryable,omitempty"`
 }
 
-// New creates a new error with code and message
+// New creates a new structured error with the given code and message.
+// The error will have a timestamp set to the current time and default severity of "error".
 func New(code ErrorCode, message string) *Error {
 	return &Error{
 		Code:      code,
@@ -39,7 +42,8 @@ func New(code ErrorCode, message string) *Error {
 	}
 }
 
-// NewWithField creates a new error with field and value
+// NewWithField creates a new structured error with the given code, message, field, and value.
+// This is useful for validation errors where you need to specify which field caused the error.
 func NewWithField(code ErrorCode, message, field, value string) *Error {
 	return &Error{
 		Code:      code,
@@ -52,7 +56,8 @@ func NewWithField(code ErrorCode, message, field, value string) *Error {
 	}
 }
 
-// NewWithContext creates a new error with additional context
+// NewWithContext creates a new structured error with the given code, message, and context map.
+// The context map allows you to attach additional metadata to the error for debugging purposes.
 func NewWithContext(code ErrorCode, message string, context map[string]interface{}) *Error {
 	return &Error{
 		Code:      code,

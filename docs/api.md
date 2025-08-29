@@ -4,7 +4,7 @@ This document provides a complete reference for all public APIs in the go-errors
 
 ## Package Overview
 
-The `errors` package provides structured error handling with support for error codes, context, stack traces, and user-friendly messages.
+The `errors` package provides structured, contextual error handling for Go applications. It offers a comprehensive error handling system with features like structured error types, stack traces, user-friendly messages, JSON serialization, retry logic, and interface-based error handling.
 
 ## Types
 
@@ -227,7 +227,7 @@ Implements errors.As compatibility. Delegates to the standard library's errors.A
 ```go
 func (e *Error) WithUserMessage(msg string) *Error
 ```
-Sets a user-friendly message on the error.
+Sets a user-friendly message on the error and returns the error for chaining.
 
 **Parameters:**
 - `msg`: User-friendly error message
@@ -239,13 +239,75 @@ Sets a user-friendly message on the error.
 err := errors.New("VALIDATION_ERROR", "Invalid input").WithUserMessage("Please check your input and try again")
 ```
 
+### WithContext
+```go
+func (e *Error) WithContext(key string, value interface{}) *Error
+```
+Adds or updates context information on the error and returns the error for chaining.
+
+**Parameters:**
+- `key`: Context key
+- `value`: Context value
+
+**Returns:** Self-reference for method chaining
+
+**Example:**
+```go
+err := errors.New("DATABASE_ERROR", "Query failed").WithContext("query", "SELECT * FROM users")
+```
+
+### AsRetryable
+```go
+func (e *Error) AsRetryable() *Error
+```
+Marks the error as retryable and returns the error for chaining.
+
+**Returns:** Self-reference for method chaining
+
+**Example:**
+```go
+err := errors.New("NETWORK_ERROR", "Connection timeout").AsRetryable()
+```
+
+### WithSeverity
+```go
+func (e *Error) WithSeverity(severity string) *Error
+```
+Sets the severity level of the error and returns the error for chaining.
+
+**Parameters:**
+- `severity`: Severity level ("error", "warning", "info", "critical")
+
+**Returns:** Self-reference for method chaining
+
+**Example:**
+```go
+err := errors.New("VALIDATION_ERROR", "Invalid input").WithSeverity("warning")
+```
+
 ### UserMessage
 ```go
 func (e *Error) UserMessage() string
 ```
-Returns the user-friendly message if set, otherwise the technical message.
+Returns the user-friendly message if set, otherwise falls back to the technical message.
 
 **Returns:** User-friendly or technical message
+
+### ErrorCode
+```go
+func (e *Error) ErrorCode() ErrorCode
+```
+Returns the error code.
+
+**Returns:** The error code
+
+### IsRetryable
+```go
+func (e *Error) IsRetryable() bool
+```
+Returns whether the error is retryable.
+
+**Returns:** True if the error is retryable
 
 ### MarshalJSON
 ```go

@@ -1,24 +1,24 @@
 # Usage Guide
 
-This guide covers all core features of go-errors, with practical examples.
+This guide covers all core features of go-errors, with practical examples and real-world usage patterns.
 
 ## Getting Started
 
 ### Installation
 ```sh
-go get github.com/AGILira/go-errors
+go get github.com/agilira/go-errors
 ```
 
 ### Import
 ```go
-import goerrors "github.com/AGILira/go-errors"
+import "github.com/agilira/go-errors"
 ```
 
 ### Creating and Wrapping Errors
 ```go
 const ErrCodeValidation = "VALIDATION_ERROR"
-err := goerrors.New(ErrCodeValidation, "Validation failed")
-wrapped := goerrors.Wrap(err, ErrCodeValidation, "Additional context")
+err := errors.New(ErrCodeValidation, "Validation failed")
+wrapped := errors.Wrap(err, ErrCodeValidation, "Additional context")
 ```
 
 ## Error Structure
@@ -35,13 +35,13 @@ wrapped := goerrors.Wrap(err, ErrCodeValidation, "Additional context")
 
 ## User Messages
 ```go
-err := goerrors.New("VALIDATION_ERROR", "Invalid input").WithUserMessage("Please check your input.")
+err := errors.New("VALIDATION_ERROR", "Invalid input").WithUserMessage("Please check your input.")
 msg := err.UserMessage() // User message if set, else technical message
 ```
 
 ## Stacktrace
 ```go
-err := goerrors.Wrap(errors.New("fail"), "CODE", "Context")
+err := errors.Wrap(errors.New("fail"), "CODE", "Context")
 if err.Stack != nil {
     fmt.Println(err.Stack.String())
 }
@@ -49,8 +49,8 @@ if err.Stack != nil {
 
 ## Helpers
 ```go
-root := goerrors.RootCause(err)
-if goerrors.HasCode(err, "VALIDATION_ERROR") { /* ... */ }
+root := errors.RootCause(err)
+if errors.HasCode(err, "VALIDATION_ERROR") { /* ... */ }
 if errors.Is(err, targetErr) { /* ... */ }
 if errors.As(err, &target) { /* ... */ }
 ```
@@ -65,15 +65,17 @@ fmt.Println(string(b))
 
 ### Chaining and Context
 ```go
-err := goerrors.New("DB_ERROR", "Query failed").WithUserMessage("Database unavailable").WithContext("query", "SELECT * FROM users")
-err = goerrors.Wrap(err, "SERVICE_ERROR", "Service layer failure")
+err := errors.New("DB_ERROR", "Query failed").
+    WithUserMessage("Database unavailable").
+    WithContext("query", "SELECT * FROM users").
+    WithSeverity("critical")
+err = errors.Wrap(err, "SERVICE_ERROR", "Service layer failure")
 ```
 
 ### Retryable Errors
 ```go
-err := goerrors.New("TEMP_ERROR", "Temporary failure")
-err.Retryable = true
-if retry, ok := interface{}(err).(goerrors.Retryable); ok && retry.IsRetryable() {
+err := errors.New("TEMP_ERROR", "Temporary failure").AsRetryable()
+if retry, ok := err.(errors.Retryable); ok && retry.IsRetryable() {
     // Retry logic
 }
 ```
@@ -82,9 +84,34 @@ if retry, ok := interface{}(err).(goerrors.Retryable); ok && retry.IsRetryable()
 ```go
 // In a REST handler
 if err != nil {
-    apiErr, _ := err.(*goerrors.Error)
+    apiErr, _ := err.(*errors.Error)
     http.Error(w, apiErr.UserMessage(), 400)
 }
+```
+
+### Interface-Based Error Handling
+```go
+// Type-safe error code extraction
+var coder errors.ErrorCoder = err
+code := coder.ErrorCode()
+
+// Check if error is retryable
+var retry errors.Retryable = err
+if retry.IsRetryable() {
+    // Implement retry logic
+}
+
+// Get user-friendly message
+var um errors.UserMessager = err
+userMsg := um.UserMessage()
+```
+
+### Error Severity Levels
+```go
+// Different severity levels
+err := errors.New("VALIDATION_ERROR", "Invalid input").WithSeverity("warning")
+err = errors.New("DATABASE_ERROR", "Connection lost").WithSeverity("critical")
+err = errors.New("INFO_ERROR", "Operation completed").WithSeverity("info")
 ``` 
 
 ---
