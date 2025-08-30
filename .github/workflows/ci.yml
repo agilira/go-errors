@@ -35,6 +35,13 @@ jobs:
         go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
         go tool cover -func=coverage.out
 
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.out
+        fail_ci_if_error: false
+        verbose: true
+      continue-on-error: true
 
 
   quality:

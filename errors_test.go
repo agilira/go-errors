@@ -265,3 +265,87 @@ func TestUserMessageWithEmptyBoth(t *testing.T) {
 		t.Errorf("Expected empty string when both messages are empty, got: %s", result)
 	}
 }
+
+func TestWithContext(t *testing.T) {
+	err := New(TestCodeValidation, "Test error")
+
+	// Test adding context to error with nil context
+	err.Context = nil
+	err = err.WithContext("key1", "value1")
+	if err.Context == nil {
+		t.Error("Expected context to be initialized")
+	}
+	if err.Context["key1"] != "value1" {
+		t.Errorf("Expected context key1 to be 'value1', got '%v'", err.Context["key1"])
+	}
+
+	// Test adding more context
+	err = err.WithContext("key2", "value2")
+	if err.Context["key2"] != "value2" {
+		t.Errorf("Expected context key2 to be 'value2', got '%v'", err.Context["key2"])
+	}
+
+	// Test updating existing context
+	err = err.WithContext("key1", "updated_value")
+	if err.Context["key1"] != "updated_value" {
+		t.Errorf("Expected context key1 to be 'updated_value', got '%v'", err.Context["key1"])
+	}
+}
+
+func TestAsRetryable(t *testing.T) {
+	err := New(TestCodeValidation, "Test error")
+
+	// Test marking error as retryable
+	err = err.AsRetryable()
+	if !err.Retryable {
+		t.Error("Expected error to be marked as retryable")
+	}
+
+	// Test that it returns the same error instance for chaining
+	if err.AsRetryable() != err {
+		t.Error("Expected AsRetryable to return the same error instance")
+	}
+}
+
+func TestWithSeverity(t *testing.T) {
+	err := New(TestCodeValidation, "Test error")
+
+	// Test setting severity
+	err = err.WithSeverity("warning")
+	if err.Severity != "warning" {
+		t.Errorf("Expected severity to be 'warning', got '%s'", err.Severity)
+	}
+
+	// Test setting different severity
+	err = err.WithSeverity("critical")
+	if err.Severity != "critical" {
+		t.Errorf("Expected severity to be 'critical', got '%s'", err.Severity)
+	}
+
+	// Test that it returns the same error instance for chaining
+	if err.WithSeverity("info") != err {
+		t.Error("Expected WithSeverity to return the same error instance")
+	}
+}
+
+func TestMethodChaining(t *testing.T) {
+	err := New(TestCodeValidation, "Test error").
+		WithUserMessage("User message").
+		WithContext("key", "value").
+		WithSeverity("warning").
+		AsRetryable()
+
+	// Verify all methods were applied
+	if err.UserMsg != "User message" {
+		t.Error("Expected user message to be set")
+	}
+	if err.Context["key"] != "value" {
+		t.Error("Expected context to be set")
+	}
+	if err.Severity != "warning" {
+		t.Error("Expected severity to be set")
+	}
+	if !err.Retryable {
+		t.Error("Expected error to be retryable")
+	}
+}

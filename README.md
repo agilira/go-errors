@@ -7,7 +7,7 @@ Built for Styx, it includes error codes, stack traces, user messages, and JSON s
 [![CI](https://github.com/agilira/go-errors/actions/workflows/ci.yml/badge.svg)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
 [![Security](https://img.shields.io/badge/Security-gosec-brightgreen)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/agilira/go-errors)](https://goreportcard.com/report/github.com/agilira/go-errors)
-[![Coverage](https://img.shields.io/badge/coverage-86%25-brightgreen)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/agilira/go-errors/branch/main/graph/badge.svg)](https://codecov.io/gh/agilira/go-errors)
 
 ## Features
 - Structured error type: code, message, context, cause, severity
