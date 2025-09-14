@@ -1,6 +1,6 @@
 // interfaces.go: Interfaces for the go-errors AGILira library
 //
-// Copyright (c) 2025 AGILira
+// Copyright (c) 2025 AGILira - A. Giordano
 // Series: an AGLIra library
 // SPDX-License-Identifier: MPL-2.0
 

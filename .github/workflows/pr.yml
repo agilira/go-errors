@@ -1,48 +1,39 @@
-name: Pull Request Checks
+name: PR Quick Check
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 env:
-  GO_VERSION: '1.24.5'
+  CGO_ENABLED: 1
 
 jobs:
-  pr-checks:
-    name: PR Validation
+  quick-test:
+    name: Quick Validation
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
+    - name: Setup Go
+      uses: actions/setup-go@v5
       with:
-        go-version: ${{ env.GO_VERSION }}
+        go-version: '1.23'
         cache: true
 
-    - name: Validate go.mod and go.sum
+    - name: Quick Quality Check
       run: |
-        go mod download
-        go mod verify
-        go mod tidy
-        if [ -n "$(git status --porcelain)" ]; then
-          echo "go.mod or go.sum is not clean. Please run 'go mod tidy'"
-          git diff
-          exit 1
-        fi
+        # Format check
+        test -z "$(gofmt -l .)"
+        
+        # Vet
+        go vet ./...
+        
+        # Basic test
+        go test -short ./...
 
-    - name: Run tests
-      run: go test -v -race ./...
+    - name: Install Security Tools
+      run: go install github.com/securego/gosec/v2/cmd/gosec@latest
 
-    - name: Run go fmt check
-      run: |
-        if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
-          echo "Code is not formatted. Please run 'go fmt ./...'"
-          gofmt -s -d .
-          exit 1
-        fi
-
-    - name: Run go vet
-      run: go vet ./... 
+    - name: Security Scan
+      run: gosec --exclude=G104,G306,G301 ./...

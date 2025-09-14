@@ -1,6 +1,6 @@
 // errors_test.go: Tests for the go-errors AGILira library
 //
-// Copyright (c) 2025 AGILira
+// Copyright (c) 2025 AGILira - A. Giordano
 // Series: an AGLIra library
 // SPDX-License-Identifier: MPL-2.0
 
@@ -9,6 +9,7 @@ package errors
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -20,15 +21,25 @@ const (
 
 func TestNew(t *testing.T) {
 	err := New(TestCodeValidation, "Validation failed")
-	if err.Code != TestCodeValidation {
-		t.Errorf("Expected code %s, got %s", TestCodeValidation, err.Code)
+
+	// Use a table-driven approach to reduce cyclomatic complexity
+	tests := []struct {
+		field    string
+		expected interface{}
+		actual   interface{}
+	}{
+		{"Code", TestCodeValidation, err.Code},
+		{"Message", "Validation failed", err.Message},
+		{"Severity", SeverityError, err.Severity},
 	}
-	if err.Message != "Validation failed" {
-		t.Errorf("Expected message 'Validation failed', got '%s'", err.Message)
+
+	for _, tt := range tests {
+		if tt.actual != tt.expected {
+			t.Errorf("Field %s: expected %v, got %v", tt.field, tt.expected, tt.actual)
+		}
 	}
-	if err.Severity != "error" {
-		t.Errorf("Expected severity 'error', got '%s'", err.Severity)
-	}
+
+	// Test special cases separately for clarity
 	if err.Timestamp.IsZero() {
 		t.Error("Expected timestamp to be set")
 	}
@@ -191,20 +202,26 @@ func TestMarshalJSONWithNilStack(t *testing.T) {
 		t.Fatal("Stack should be nil for errors created with New()")
 	}
 
+	// Test JSON marshaling and validation in helper function to reduce complexity
+	validateJSONStack(t, err, "Stack should be empty string when nil")
+}
+
+// Helper function to reduce cyclomatic complexity in JSON tests
+func validateJSONStack(t *testing.T, err *Error, expectedMsg string) {
 	data, errMarshal := json.Marshal(err)
 	if errMarshal != nil {
 		t.Errorf("MarshalJSON failed: %v", errMarshal)
+		return
 	}
 
-	// Verify that stack field is empty string when nil
 	var result map[string]interface{}
 	if errUnmarshal := json.Unmarshal(data, &result); errUnmarshal != nil {
 		t.Errorf("Failed to unmarshal: %v", errUnmarshal)
+		return
 	}
 
-	// Stack should be empty string when nil
 	if stack, exists := result["stack"]; exists && stack != "" {
-		t.Error("Stack should be empty string when nil")
+		t.Error(expectedMsg)
 	}
 }
 
@@ -213,21 +230,8 @@ func TestMarshalJSONWithEmptyStack(t *testing.T) {
 	err := New(TestCodeValidation, "Validation failed")
 	err.Stack = &Stacktrace{Frames: []uintptr{}} // Empty stack
 
-	data, errMarshal := json.Marshal(err)
-	if errMarshal != nil {
-		t.Errorf("MarshalJSON failed: %v", errMarshal)
-	}
-
-	// This should force the execution of the return "" branch
-	var result map[string]interface{}
-	if errUnmarshal := json.Unmarshal(data, &result); errUnmarshal != nil {
-		t.Errorf("Failed to unmarshal: %v", errUnmarshal)
-	}
-
-	// Stack should be empty string when stack has no frames
-	if stack, exists := result["stack"]; exists && stack != "" {
-		t.Error("Stack should be empty string when stack has no frames")
-	}
+	// Use helper function to reduce complexity
+	validateJSONStack(t, err, "Stack should be empty string when stack has no frames")
 }
 
 func TestStacktraceStringWithNilStacktrace(t *testing.T) {
@@ -329,23 +333,147 @@ func TestWithSeverity(t *testing.T) {
 }
 
 func TestMethodChaining(t *testing.T) {
-	err := New(TestCodeValidation, "Test error").
-		WithUserMessage("User message").
+	err := New(TestCodeValidation, "Test").
+		WithUserMessage("User friendly message").
 		WithContext("key", "value").
-		WithSeverity("warning").
-		AsRetryable()
+		AsRetryable().
+		WithSeverity("warning")
 
-	// Verify all methods were applied
-	if err.UserMsg != "User message" {
-		t.Error("Expected user message to be set")
+	if err.UserMsg != "User friendly message" {
+		t.Error("Method chaining failed for UserMessage")
 	}
 	if err.Context["key"] != "value" {
-		t.Error("Expected context to be set")
-	}
-	if err.Severity != "warning" {
-		t.Error("Expected severity to be set")
+		t.Error("Method chaining failed for Context")
 	}
 	if !err.Retryable {
-		t.Error("Expected error to be retryable")
+		t.Error("Method chaining failed for Retryable")
 	}
+	if err.Severity != "warning" {
+		t.Error("Method chaining failed for Severity")
+	}
+}
+
+func TestSeverityConstants(t *testing.T) {
+	// Test that severity constants are properly defined
+	if SeverityCritical != "critical" {
+		t.Errorf("Expected SeverityCritical to be 'critical', got '%s'", SeverityCritical)
+	}
+	if SeverityError != "error" {
+		t.Errorf("Expected SeverityError to be 'error', got '%s'", SeverityError)
+	}
+	if SeverityWarning != "warning" {
+		t.Errorf("Expected SeverityWarning to be 'warning', got '%s'", SeverityWarning)
+	}
+	if SeverityInfo != "info" {
+		t.Errorf("Expected SeverityInfo to be 'info', got '%s'", SeverityInfo)
+	}
+}
+
+func TestSeverityHelperMethods(t *testing.T) {
+	err := New(TestCodeValidation, "Test message")
+
+	// Test critical severity helper (return value intentionally ignored to test in-place modification)
+	_ = err.WithCriticalSeverity()
+	if err.Severity != SeverityCritical {
+		t.Errorf("Expected severity '%s', got '%s'", SeverityCritical, err.Severity)
+	}
+
+	// Test warning severity helper (return value intentionally ignored to test in-place modification)
+	_ = err.WithWarningSeverity()
+	if err.Severity != SeverityWarning {
+		t.Errorf("Expected severity '%s', got '%s'", SeverityWarning, err.Severity)
+	}
+
+	// Test info severity helper (return value intentionally ignored to test in-place modification)
+	_ = err.WithInfoSeverity()
+	if err.Severity != SeverityInfo {
+		t.Errorf("Expected severity '%s', got '%s'", SeverityInfo, err.Severity)
+	}
+}
+
+func TestErrorCodeValidation(t *testing.T) {
+	// Table-driven tests to reduce cyclomatic complexity
+	testCases := []struct {
+		name         string
+		input        ErrorCode
+		expectedCode ErrorCode
+	}{
+		{"empty ErrorCode", "", DefaultErrorCode},
+		{"whitespace-only ErrorCode", "   \t\n  ", DefaultErrorCode},
+		{"valid ErrorCode", "VALID_CODE", "VALID_CODE"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := New(tc.input, "Test message")
+			if err.Code != tc.expectedCode {
+				t.Errorf("Expected code '%s', got '%s'", tc.expectedCode, err.Code)
+			}
+		})
+	}
+
+	// Test constructor functions with empty codes
+	testConstructorValidation(t)
+}
+
+// Helper function to test constructor validation
+func testConstructorValidation(t *testing.T) {
+	constructors := []struct {
+		name string
+		fn   func() ErrorCode
+	}{
+		{"NewWithField", func() ErrorCode {
+			return NewWithField("", "Test message", "field", "value").Code
+		}},
+		{"NewWithContext", func() ErrorCode {
+			ctx := map[string]interface{}{"key": "value"}
+			return NewWithContext("", "Test message", ctx).Code
+		}},
+		{"Wrap", func() ErrorCode {
+			originalErr := fmt.Errorf("original error")
+			return Wrap(originalErr, "", "Wrapped message").Code
+		}},
+	}
+
+	for _, constructor := range constructors {
+		t.Run(constructor.name, func(t *testing.T) {
+			code := constructor.fn()
+			if code != DefaultErrorCode {
+				t.Errorf("Expected code '%s' for empty input in %s, got '%s'",
+					DefaultErrorCode, constructor.name, code)
+			}
+		})
+	}
+}
+
+func TestStacktraceOptimizations(t *testing.T) {
+	// Test stacktrace capture with normal depth
+	stack := CaptureStacktrace(0)
+	if stack == nil {
+		t.Fatal("Expected non-nil stacktrace")
+	}
+
+	if len(stack.Frames) == 0 {
+		t.Error("Expected frames in stacktrace")
+	}
+
+	// Test String() method optimizations
+	stackStr := stack.String()
+	if len(stackStr) == 0 {
+		t.Error("Expected non-empty stacktrace string")
+	}
+
+	// Test direct access to optimization paths by calling recursive function
+	recursiveStack := testRecursiveStackCapture(0, 20) // Create deeper stack
+	if recursiveStack == nil {
+		t.Fatal("Expected non-nil recursive stacktrace")
+	}
+}
+
+// Helper function to create deeper call stacks for testing
+func testRecursiveStackCapture(depth, target int) *Stacktrace {
+	if depth >= target {
+		return CaptureStacktrace(0)
+	}
+	return testRecursiveStackCapture(depth+1, target)
 }

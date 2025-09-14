@@ -1,6 +1,6 @@
 // usermsg.go: Returns the user-friendly messages to the users
 //
-// Copyright (c) 2025 AGILira
+// Copyright (c) 2025 AGILira - A. Giordano
 // Series: an AGLIra library
 // SPDX-License-Identifier: MPL-2.0
 
@@ -8,6 +8,11 @@ package errors
 
 // WithUserMessage sets a user-friendly message on the error and returns the error for chaining.
 // This message should be safe to display to end users without exposing technical details.
+//
+// Example:
+//
+//	err := New("DB_CONNECTION_ERROR", "Database connection timeout").
+//		WithUserMessage("We're experiencing technical difficulties. Please try again later.")
 func (e *Error) WithUserMessage(msg string) *Error {
 	e.UserMsg = msg
 	return e
@@ -56,4 +61,22 @@ func (e *Error) ErrorCode() ErrorCode {
 // This implements the Retryable interface.
 func (e *Error) IsRetryable() bool {
 	return e.Retryable
+}
+
+// WithCriticalSeverity sets the error severity to critical and returns the error for chaining.
+// Use this for system failures, data corruption, or security breaches.
+func (e *Error) WithCriticalSeverity() *Error {
+	return e.WithSeverity(SeverityCritical)
+}
+
+// WithWarningSeverity sets the error severity to warning and returns the error for chaining.
+// Use this for issues that don't prevent operation but need attention.
+func (e *Error) WithWarningSeverity() *Error {
+	return e.WithSeverity(SeverityWarning)
+}
+
+// WithInfoSeverity sets the error severity to info and returns the error for chaining.
+// Use this for informational messages for debugging or audit trails.
+func (e *Error) WithInfoSeverity() *Error {
+	return e.WithSeverity(SeverityInfo)
 }

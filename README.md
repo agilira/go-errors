@@ -2,12 +2,15 @@
 ### an AGILira library
 
 go-errors is a fast, structured, and context-aware error handling library for Go.
-Built for Styx, it includes error codes, stack traces, user messages, and JSON support — with zero overhead.
+Originally built for [Orpheus](https://github.com/agilira/orpheus), it provides error codes, stack traces, user messages, and JSON support with near-zero overhead through [Timecache](https://github.com/agilira/go-timecache) integration.
 
 [![CI](https://github.com/agilira/go-errors/actions/workflows/ci.yml/badge.svg)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
 [![Security](https://img.shields.io/badge/Security-gosec-brightgreen)](https://github.com/agilira/go-errors/actions/workflows/ci.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/agilira/go-errors)](https://goreportcard.com/report/github.com/agilira/go-errors)
+[![Go Report Card](https://goreportcard.com/badge/github.com/agilira/go-errors?v=2)](https://goreportcard.com/report/github.com/agilira/go-errors)
 [![Coverage](https://codecov.io/gh/agilira/go-errors/branch/main/graph/badge.svg)](https://codecov.io/gh/agilira/go-errors)
+[![pkg.go.dev](https://pkg.go.dev/badge/github.com/agilira/go-errors.svg)](https://pkg.go.dev/github.com/agilira/go-errors)
+
+**[Features](#features) • [Performance](#performance) • [Quick Start](#quick-start) • [JSON Output](#json-output) • [Testing & Coverage](#testing--coverage) • [Documentation](#documentation)**
 
 ## Features
 - Structured error type: code, message, context, cause, severity
@@ -17,15 +20,40 @@ Built for Styx, it includes error codes, stack traces, user messages, and JSON s
 - JSON serialization for API/microservices
 - Retryable and interface-based error handling
 - Helpers for wrapping, root cause, code search
-- 100% Go standard library, no external dependencies
 - Modular, fully tested, high coverage
 
-## Installation
+## Compatibility and Support
+
+go-plugins is designed for Go 1.23+ environments and follows Long-Term Support guidelines to ensure consistent performance across production deployments.
+
+## Performance
+
+```
+AMD Ryzen 5 7520U with Radeon Graphics
+BenchmarkNew-8                          12971414      86.61 ns/op    208 B/op    2 allocs/op
+BenchmarkNewWithField-8                 12536019      87.98 ns/op    208 B/op    2 allocs/op
+BenchmarkNewWithContext-8               20815206      57.17 ns/op    160 B/op    1 allocs/op
+BenchmarkWrap-8                          2111182     558.0 ns/op     264 B/op    4 allocs/op
+BenchmarkMethodChaining-8                5201632     220.8 ns/op     504 B/op    3 allocs/op
+BenchmarkHasCode-8                      325451757       3.66 ns/op      0 B/op    0 allocs/op
+BenchmarkRootCause-8                    144666518       8.18 ns/op      0 B/op    0 allocs/op
+BenchmarkMarshalJSON-8                    449632     2603 ns/op      568 B/op    7 allocs/op
+```
+
+**Reproduce benchmarks**:
+```bash
+go test -bench=. -benchmem
+```
+
+## Quick Start
+
+### Installation
+
 ```sh
 go get github.com/agilira/go-errors
 ```
 
-## Quick Example
+### Quick Example
 ```go
 import "github.com/agilira/go-errors"
 

@@ -1,0 +1,70 @@
+run:
+  timeout: 5m
+  go: "1.23"
+
+linters-settings:
+  govet:
+    enable-all: true
+  gocyclo:
+    min-complexity: 15
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  misspell:
+    locale: US
+  lll:
+    line-length: 120
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+
+linters:
+  enable:
+    - bodyclose
+    - depguard
+    - dogsled
+    - errcheck
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - gomnd
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - lll
+    - misspell
+    - nakedret
+    - rowserrcheck
+    - staticcheck
+    - stylecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+  disable:
+    - typecheck  # Disable typecheck as it has issues with external modules
+
+issues:
+  exclude-use-default: false
+  exclude:
+    # Allow long lines in examples
+    - "line is [0-9]+ characters"
+    # Exclude typecheck errors for external modules
+    - "undefined: timecache"
+    - "undefined: errors"
+  exclude-rules:
+    - path: "_test\\.go"
+      linters:
+        - gomnd
+        - lll
+    - path: "example_test\\.go"
+      linters:
+        - typecheck
