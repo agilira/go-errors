@@ -24,7 +24,7 @@ Originally built for [Orpheus](https://github.com/agilira/orpheus), it provides 
 
 ## Compatibility and Support
 
-go-plugins is designed for Go 1.23+ environments and follows Long-Term Support guidelines to ensure consistent performance across production deployments.
+go-errors is designed for Go 1.23+ environments and follows Long-Term Support guidelines to ensure consistent performance across production deployments.
 
 ## Performance
 
