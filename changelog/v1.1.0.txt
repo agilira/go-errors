@@ -1,0 +1,129 @@
+# Changelog - Version 1.1.0# Changelog - Version 1.0.2
+
+
+
+## Release Date## Release Date
+
+2025-09-152025-09-14
+
+
+
+## Overview## Overview
+
+Feature enhancement release adding chainable methods for improved developer experience and logging-specific parameters.Performance and documentation enhancement release focusing on timestamp optimization, comprehensive quality assurance, and professional documentation standards.
+
+
+
+## New## New
+
+- WithContext() method for adding context information to errors- Integration with go-timecache for ultra-fast timestamp generation
+
+- AsRetryable() method for marking errors as retryable- Comprehensive benchmark suite with 15 performance tests
+
+- WithSeverity() method for setting error severity levels- Complete GoDoc documentation for all public APIs
+
+- Enhanced method chaining capabilities for fluent API usage- Professional README with performance metrics and pkg.go.dev badge
+
+- Logging-specific parameters and metadata support- golangci-lint configuration with 20+ active linters
+
+- Quality assurance validation pipeline
+
+## Updated
+
+- Enhanced usermsg.go with new chainable methods## Updated
+
+- Updated file headers from "AGLIra fragment" to "AGLIra library"- Error constructors now use timecache.CachedTime() for 90x faster timestamp operations
+
+- LICENSE file renamed to LICENSE.md for better GitHub recognition- README.md with performance benchmarks and ecosystem links
+
+- README.md with Go Report Card badge- Enhanced project description linking to Orpheus and Timecache projects
+
+- CODE_OF_CONDUCT.md with proper contact email (github@agilira.com)- Comprehensive API examples in package documentation
+
+- CONTRIBUTING.md with correct repository references- Badge collection updated with pkg.go.dev reference
+
+
+
+## Features## Performance Improvements
+
+- **WithContext(key, value)** - Add or update context information on errors- New() constructor: optimized timestamp generation with timecache integration
+
+- **AsRetryable()** - Mark errors as suitable for retry logic- NewWithField() constructor: enhanced performance through cached time operations
+
+- **WithSeverity(level)** - Set error severity for logging and alerting systems- NewWithContext() constructor: improved efficiency with timestamp optimization
+
+- **Enhanced method chaining** - All new methods return *Error for fluent API usage- Overall timestamp performance increase: ~90x improvement over time.Now()
+
+
+
+## API Enhancements## Documentation
+
+- Fluent interface support for building complex error objects- Complete GoDoc coverage for all exported functions and types
+
+- Better integration with logging frameworks through severity levels- Professional package documentation with usage examples
+
+- Improved error metadata management with context support- Real-world integration examples for REST APIs, databases, and validation
+
+- Simplified retry logic implementation with retryable flag- Migration guide from standard library errors
+
+- Performance considerations and best practices documentation
+
+## Documentation- Type-safe interface usage examples
+
+- Updated all file headers for consistency
+
+- Improved repository documentation accuracy## Quality Assurance
+
+- Enhanced contributing guidelines- Full golangci-lint compliance with comprehensive rule set
+
+- Better contact information for community support- staticcheck validation passing
+
+- errcheck analysis confirming proper error handling
+
+## Compatibility- gosec security analysis validation
+
+- Maintains backward compatibility with v1.0.x- gofmt formatting verification
+
+- No breaking changes to existing public API- go vet analysis completion
+
+- Additive changes only - all existing code continues to work- 100% test coverage maintained
+
+- Enhanced functionality while preserving existing behavior
+
+## Technical Enhancements
+
+## Quality Assurance- Modular architecture with separated concerns across multiple files
+
+- All existing tests continue to pass- Enhanced error construction validation
+
+- New methods follow established patterns- Optimized memory allocation patterns
+
+- Consistent code style and documentation- Improved stacktrace performance characteristics
+
+- Professional development standards maintained- Professional coding standards compliance
+
+
+
+## Migration Guide## Compatibility
+
+- Existing code requires no changes- Maintains backward compatibility with v1.0.0 and v1.0.1
+
+- New methods available for enhanced error handling- No breaking changes to public API
+
+- Chainable API enables more concise error construction- Enhanced performance while preserving existing functionality
+
+- Severity levels can be adopted incrementally- Go 1.23+ environment optimizations
+
+- Cross-platform compatibility maintained
+
+## Technical Notes
+
+- Methods follow immutable pattern - errors can be safely shared## Dependencies
+
+- Context information stored in existing Context map- Added: github.com/agilira/go-timecache v1.0.2 for enhanced performance
+
+- Retryable flag uses existing Retryable field- Zero additional external dependencies
+
+- Severity stored in existing Severity field- Maintained minimal dependency footprint
+
+- Zero performance impact on existing functionality
