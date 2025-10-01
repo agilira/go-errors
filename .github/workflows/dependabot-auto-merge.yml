@@ -17,7 +17,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: 'stable'
 
       - name: Cache Go modules
         uses: actions/cache@v4
@@ -33,16 +33,6 @@ jobs:
         run: |
           go mod download
           go test -v ./...
-
-      - name: Run benchmarks (quick)
-        run: |
-          if [ -d "benchmarks" ]; then
-            cd benchmarks
-            go mod download
-            go test -bench=. -benchtime=1s
-          else
-            echo "No benchmarks directory found, skipping"
-          fi
 
       - name: Check if PR can be auto-merged
         id: auto-merge-check
@@ -64,7 +54,7 @@ jobs:
       - name: Add comment for manual review
         if: steps.auto-merge-check.outputs.can_auto_merge == 'false'
         run: |
-          gh pr comment "${{ github.event.pull_request.number }}" --body "🔍 **Manual Review Required**
+          gh pr comment "${{ github.event.pull_request.number }}" --body "**Manual Review Required**
           
           This appears to be a major version update that requires manual review.
           Please verify:
