@@ -41,8 +41,10 @@ function Invoke-Help {
     Write-ColorOutput "  staticcheck   Run staticcheck" $Green
     Write-ColorOutput "  errcheck      Run errcheck" $Green
     Write-ColorOutput "  gosec         Run gosec security scanner" $Green
+    Write-ColorOutput "  govulcheck    Run govulncheck for vulnerability scanning" $Green
     Write-ColorOutput "  lint          Run all linters" $Green
     Write-ColorOutput "  security      Run security checks" $Green
+    Write-ColorOutput "  fuzz          Run fuzz tests" $Green
     Write-ColorOutput "  check         Run all checks (format, vet, lint, security, test)" $Green
     Write-ColorOutput "  check-race    Run all checks including race detector" $Green
     Write-ColorOutput "  tools         Install development tools" $Green
@@ -124,6 +126,17 @@ function Invoke-GoSec {
     }
 }
 
+function Invoke-GovulnCheck {
+    Write-ColorOutput "Running govulncheck for vulnerability scanning..." $Yellow
+    $govulnPath = Get-Command govulncheck -ErrorAction SilentlyContinue
+    if (-not $govulnPath) {
+        Write-ColorOutput "govulncheck not found. Run '.\Makefile.ps1 tools' to install." $Red
+        exit 1
+    }
+    govulncheck "./..."
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
+
 function Invoke-Lint {
     Invoke-StaticCheck
     Invoke-ErrCheck
@@ -132,7 +145,46 @@ function Invoke-Lint {
 
 function Invoke-Security {
     Invoke-GoSec
+    Invoke-GovulnCheck
     Write-ColorOutput "Security checks completed." $Green
+}
+
+function Invoke-Fuzz {
+    Write-ColorOutput "Running fuzz tests..." $Yellow
+    
+    Write-ColorOutput "Running FuzzNew..." $Blue
+    go test -fuzz='FuzzNew$' -fuzztime=30s
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    
+    Write-ColorOutput "Running FuzzNewWithField..." $Blue
+    go test -fuzz='FuzzNewWithField$' -fuzztime=30s
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    
+    Write-ColorOutput "Running FuzzWrap..." $Blue
+    go test -fuzz='FuzzWrap$' -fuzztime=30s
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    
+    Write-ColorOutput "Running FuzzWithMethods..." $Blue
+    go test -fuzz='FuzzWithMethods$' -fuzztime=30s
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    
+    Write-ColorOutput "Running FuzzHasCode..." $Blue
+    go test -fuzz='FuzzHasCode$' -fuzztime=30s
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    
+    Write-ColorOutput "Running FuzzJSONMarshal..." $Blue
+    go test -fuzz='FuzzJSONMarshal$' -fuzztime=30s
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    
+    Write-ColorOutput "Running FuzzValidateErrorCode..." $Blue
+    go test -fuzz='FuzzValidateErrorCode$' -fuzztime=30s
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    
+    Write-ColorOutput "Running FuzzStacktrace..." $Blue
+    go test -fuzz='FuzzStacktrace$' -fuzztime=30s
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    
+    Write-ColorOutput "Fuzz tests completed." $Green
 }
 
 function Invoke-Check {
@@ -164,6 +216,9 @@ function Invoke-Tools {
     go install github.com/securego/gosec/v2/cmd/gosec@latest
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     
+    go install golang.org/x/vuln/cmd/govulncheck@latest
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    
     Write-ColorOutput "Tools installed successfully!" $Green
 }
 
@@ -172,9 +227,11 @@ function Invoke-Deps {
     go mod download
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     
+    Write-ColorOutput "Verifying dependencies..." $Yellow
     go mod verify
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     
+    Write-ColorOutput "Tidying dependencies..." $Yellow
     go mod tidy
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
@@ -250,6 +307,11 @@ function Invoke-Status {
     $gosecColor = if (Test-ToolExists "gosec") { $Green } else { $Red }
     Write-Host "gosec:       " -NoNewline
     Write-ColorOutput $gosecStatus $gosecColor
+    
+    $govulnStatus = if (Get-Command govulncheck -ErrorAction SilentlyContinue) { "✓ installed" } else { "✗ missing" }
+    $govulnColor = if (Get-Command govulncheck -ErrorAction SilentlyContinue) { $Green } else { $Red }
+    Write-Host "govulncheck: " -NoNewline
+    Write-ColorOutput $govulnStatus $govulnColor
 }
 
 # Main execution
@@ -263,8 +325,10 @@ switch ($Command.ToLower()) {
     "staticcheck" { Invoke-StaticCheck }
     "errcheck" { Invoke-ErrCheck }
     "gosec" { Invoke-GoSec }
+    "govulcheck" { Invoke-GovulnCheck }
     "lint" { Invoke-Lint }
     "security" { Invoke-Security }
+    "fuzz" { Invoke-Fuzz }
     "check" { Invoke-Check }
     "check-race" { Invoke-CheckRace }
     "tools" { Invoke-Tools }

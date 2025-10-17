@@ -171,7 +171,7 @@
 //	// After
 //	return errors.Wrap(err, ErrCodeOperation, "operation failed")
 //
-// Copyright (c) 2025 AGILira
+// Copyright (c) 2025 AGILira - A. Giordano
 // Series: an AGLIra library
 // SPDX-License-Identifier: MPL-2.0
 package errors

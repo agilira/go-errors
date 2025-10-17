@@ -1,0 +1,44 @@
+# Changelog - Version 1.1.1
+
+## Release Date
+2025-10-17
+
+## Overview
+Security and robustness enhancement release adding comprehensive fuzz testing and vulnerability scanning to strengthen error handling reliability.
+
+## New
+- Complete fuzz testing suite with 8 comprehensive test functions
+- Vulnerability scanning with govulncheck integration
+- Enhanced dependency verification with `go mod verify`
+- Improved build tooling with security-focused Makefiles
+
+## Security Enhancements
+- FuzzNew, FuzzNewWithField, FuzzWrap - Input validation fuzzing
+- FuzzJSONMarshal - JSON serialization robustness testing  
+- FuzzValidateErrorCode - Error code validation fuzzing
+- FuzzStacktrace - Stack trace handling edge case testing
+- FuzzWithMethods, FuzzHasCode - API method robustness validation
+- Vulnerability scanning integrated into CI/CD pipeline
+
+## Build & Development
+- Enhanced Makefile with `fuzz`, `govulcheck`, and improved `deps` targets
+- Cross-platform Makefile.ps1 with equivalent Windows PowerShell support
+- CI/CD workflows updated with vulnerability scanning
+- Comprehensive tool status reporting
+
+## Quality Assurance  
+- Randomized input testing protecting against edge case failures
+- UTF-8 validation for all string outputs
+- Panic prevention validation across all public APIs
+- Enhanced error chain validation testing
+
+## Compatibility
+- Maintains full backward compatibility with v1.1.0
+- No breaking changes to public API
+- Enhanced reliability through comprehensive edge case coverage
+- Zero additional runtime dependencies
+
+## Performance
+- Fuzz testing validates performance under randomized stress conditions
+- No performance degradation from security enhancements
+- Efficient fuzz test execution optimized for CI environments

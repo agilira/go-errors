@@ -23,6 +23,9 @@ jobs:
 
     - name: Quick Quality Check
       run: |
+        # Verify dependencies
+        go mod verify
+        
         # Format check
         test -z "$(gofmt -l .)"
         

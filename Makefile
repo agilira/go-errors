@@ -1,7 +1,7 @@
 # Go Makefile - AGILira Standard
 # Usage: make help
 
-.PHONY: help test race fmt vet lint security check deps clean build install tools
+.PHONY: help test race fmt vet lint security check deps clean build install tools fuzz govulcheck
 .DEFAULT_GOAL := help
 
 # Variables
@@ -66,11 +66,39 @@ gosec: ## Run gosec security scanner
 	fi
 	@$(TOOLS_DIR)/gosec ./... || (echo "$(YELLOW)  gosec completed with warnings (may be import-related)$(NC)" && exit 0)
 
+govulcheck: ## Run govulncheck for vulnerability scanning
+	@echo "$(YELLOW)Running govulncheck for vulnerability scanning...$(NC)"
+	@if ! command -v govulncheck >/dev/null 2>&1; then \
+		echo "$(RED)govulncheck not found. Run 'make tools' to install.$(NC)"; \
+		exit 1; \
+	fi
+	govulncheck ./...
+
 lint: staticcheck errcheck ## Run all linters
 	@echo "$(GREEN)All linters completed.$(NC)"
 
-security: gosec ## Run security checks
+security: gosec govulcheck ## Run security checks
 	@echo "$(GREEN)Security checks completed.$(NC)"
+
+fuzz: ## Run fuzz tests for 30 seconds each
+	@echo "$(YELLOW)Running fuzz tests...$(NC)"
+	@echo "$(BLUE)Running FuzzNew...$(NC)"
+	go test -fuzz=FuzzNew$$ -fuzztime=30s
+	@echo "$(BLUE)Running FuzzNewWithField...$(NC)"
+	go test -fuzz=FuzzNewWithField$$ -fuzztime=30s
+	@echo "$(BLUE)Running FuzzWrap...$(NC)"
+	go test -fuzz=FuzzWrap$$ -fuzztime=30s
+	@echo "$(BLUE)Running FuzzWithMethods...$(NC)"
+	go test -fuzz=FuzzWithMethods$$ -fuzztime=30s
+	@echo "$(BLUE)Running FuzzHasCode...$(NC)"
+	go test -fuzz=FuzzHasCode$$ -fuzztime=30s
+	@echo "$(BLUE)Running FuzzJSONMarshal...$(NC)"
+	go test -fuzz=FuzzJSONMarshal$$ -fuzztime=30s
+	@echo "$(BLUE)Running FuzzValidateErrorCode...$(NC)"
+	go test -fuzz=FuzzValidateErrorCode$$ -fuzztime=30s
+	@echo "$(BLUE)Running FuzzStacktrace...$(NC)"
+	go test -fuzz=FuzzStacktrace$$ -fuzztime=30s
+	@echo "$(GREEN)Fuzz tests completed.$(NC)"
 
 check: fmt vet lint security test ## Run all checks (format, vet, lint, security, test)
 	@echo "$(GREEN)All checks passed!$(NC)"
@@ -83,12 +111,15 @@ tools: ## Install development tools
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/kisielk/errcheck@latest
 	go install github.com/securego/gosec/v2/cmd/gosec@latest
+	go install golang.org/x/vuln/cmd/govulncheck@latest
 	@echo "$(GREEN)Tools installed successfully!$(NC)"
 
 deps: ## Download and verify dependencies
 	@echo "$(YELLOW)Downloading dependencies...$(NC)"
 	go mod download
+	@echo "$(YELLOW)Verifying dependencies...$(NC)"
 	go mod verify
+	@echo "$(YELLOW)Tidying dependencies...$(NC)"
 	go mod tidy
 
 clean: ## Clean build artifacts and test cache
@@ -130,3 +161,4 @@ status: ## Show status of installed tools
 	@echo -n "staticcheck: "; [ -f "$(TOOLS_DIR)/staticcheck" ] && echo "$(GREEN)✓ installed$(NC)" || echo "$(RED)✗ missing$(NC)"
 	@echo -n "errcheck:    "; [ -f "$(TOOLS_DIR)/errcheck" ] && echo "$(GREEN)✓ installed$(NC)" || echo "$(RED)✗ missing$(NC)"
 	@echo -n "gosec:       "; [ -f "$(TOOLS_DIR)/gosec" ] && echo "$(GREEN)✓ installed$(NC)" || echo "$(RED)✗ missing$(NC)"
+	@echo -n "govulncheck: "; command -v govulncheck >/dev/null 2>&1 && echo "$(GREEN)✓ installed$(NC)" || echo "$(RED)✗ missing$(NC)"
