@@ -1,0 +1,17 @@
+# Changelog - Version 1.1.3
+
+## Release Date
+2026-10-07
+
+## Overview
+Maintenance release. No API changes.
+
+## Fixed
+- An idle process importing go-errors no longer uses CPU. go-timecache, used for
+  error timestamps, started a 500µs ticker at import: about 2000 wake-ups per
+  second, roughly 5% of a core, in every program that imports go-errors, even if
+  it never creates an error. go-timecache v1.0.4 parks the ticker while nobody
+  reads the time; the next error created stores a fresh timestamp and restarts it.
+
+## Changed
+- Requires go-timecache v1.0.4 (was v1.0.3).
